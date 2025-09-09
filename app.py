@@ -1,28 +1,41 @@
+import streamlit as st
+import pandas as pd
+import joblib
+
+# ✅ Import all classes used in the pipeline
 from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
 
-import streamlit as st
-import joblib
-import numpy as np
+# ✅ Load the model safely
+try:
+    model = joblib.load('pipeline.joblib')
+except Exception as e:
+    st.error(f"Failed to load model: {e}")
+    st.stop()
 
-# Load model
-model = joblib.load('pipeline.joblib')
-
+# ✅ Streamlit UI
 st.title("🩺 Early Diabetes Risk Prediction")
+st.write("Upload patient data to predict diabetes risk.")
 
-# Input fields
-bmi = st.number_input("BMI", min_value=10.0, max_value=60.0)
-age_group = st.selectbox("Age Group", options=[1, 2, 3, 4, 5])
-phys_activity = st.selectbox("Physically Active?", options=[0, 1])
+uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
-# Feature engineering
-bmi_physact = bmi * phys_activity
-agegroup_sq = age_group ** 2
+if uploaded_file is not None:
+    try:
+        input_df = pd.read_csv(uploaded_file)
+        st.write("### Input Data Preview", input_df.head())
 
-# Predict
-if st.button("Predict"):
-    input_data = np.array([[bmi, age_group, bmi_physact, agegroup_sq]])
-    prediction = model.predict(input_data)[0]
-    st.success(f"Prediction: {'Diabetic' if prediction == 1 else 'Non-Diabetic'}")
+        # ✅ Make predictions
+        predictions = model.predict(input_df)
+        prediction_probs = model.predict_proba(input_df)[:, 1]
+
+        # ✅ Display results
+        results_df = input_df.copy()
+        results_df["Diabetes Risk"] = predictions
+        results_df["Risk Probability"] = prediction_probs
+
+        st.write("### Prediction Results", results_df)
+
+    except Exception as e:
+        st.error(f"Prediction failed: {e}")
