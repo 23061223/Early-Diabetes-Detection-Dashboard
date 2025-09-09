@@ -1,3 +1,8 @@
+from xgboost import XGBClassifier
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline
+
 import streamlit as st
 import joblib
 import numpy as np
