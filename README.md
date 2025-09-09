@@ -13,4 +13,4 @@ This Streamlit app uses an XGBoost model with feature engineering to predict dia
 - GitHub-hosted model and code
 
 ## Author
-Ziwan — Bilingual ML communicator & healthcare AI specialist
+Chua Ziwan
